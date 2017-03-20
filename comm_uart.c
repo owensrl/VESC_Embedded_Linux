@@ -49,7 +49,7 @@
 #define BAUDRATE B115200   // Change as needed, keep B
 
 /* change this definition for the correct port */
-#define MODEMDEVICE "/dev/ttyO1" // Beaglebone Black serial port (UART1)
+#define MODEMDEVICE "/dev/ttyVESC1" // Beaglebone Black serial port (UART1)
                                  // Change to use with other linux devices
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 
