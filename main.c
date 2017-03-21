@@ -42,8 +42,8 @@ int main(void) {
 	float brake = 0;
 	float pos = 0;
 	
-	// For the UART interface
-	comm_uart_init();
+	// For the serial interface
+	comm_uart_init("/dev/ttyO1");
 	// Give bldc interface a callback function to handle received values
 	bldc_interface_set_rx_value_func(bldc_val_received);
 	

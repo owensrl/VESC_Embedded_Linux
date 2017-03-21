@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
 // Functions
-void comm_uart_init(void);
+void comm_uart_init(char* modemDevice);
 void comm_uart_close(void);
 int receive_packet(void);
 

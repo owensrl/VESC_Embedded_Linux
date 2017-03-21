@@ -18,7 +18,7 @@ int main(void) {
 	float pos = 0;
 	
 	// For the UART interface
-	BLDC::init();
+	BLDC::init((char*)"/dev/ttyO1");
 	// Initialize motor object
 	BLDC leftMotor(VESC1, motor1);
 	BLDC rightMotor(VESC2, motor2);

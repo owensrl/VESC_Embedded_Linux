@@ -1,27 +1,33 @@
-This is a project for UART communication between the VESC and a Beaglebone Black.
+This is a project for serial communication between the VESC and Embedded Linux Devices, such as
+Beaglebone Black and Raspberry Pi. It will also work with any Linux Computer. The provided 
+examples in main.c and main.cpp demonstrate how to use UART1 on Beaglebone Black to 
+communicate with the VESC. 
 
-These UART APIs are based on the original stm32f4 UART project by vedderb:
+These serial APIs are based on the original stm32f4 UART project by vedderb:
 https://github.com/vedderb/bldc_uart_comm_stm32f4_discovery 
 
 He has written a tutorial on how to use and port this code to other platforms here:
 http://vedder.se/2015/10/communicating-with-the-vesc-using-uart/
 
 I have included a c++ wrapper that condenses the amount of code
-required to perform control tasks over UART.
+required to perform control tasks over serial. To use the wrapper, modify
+motortypes.h to include paramaters relevant to the specific motor and
+settings you would like to use.
 
 Examples have been provided for both API testing and Wrapper testing
 in main.c and main.cpp. 
 
 main.c demonstrates how to use the original
-APIs from vedderb to do control over UART. main.cpp demonstrates how to
-use the wrapper that I have implemented for UART control.
+APIs from vedderb to do control over serial. main.cpp demonstrates how to
+use the wrapper that I have implemented for serial control.
 
-UART APIs can be compiled with either C or C++ compilers, but the
-wrapper can only be compiled using c++. You can use the APIs in C
+Serial APIs are implemented in C, but can be compiled with either C or C++ compilers. 
+The wrapper can only be compiled using C++. You can use the APIs in C
 without the wrapper.
 
-This project can be used with other linux platforms by changing MODEMDEVICE in comm_uart.c.
+To use this library with a linux device other than Beaglebone Black, 
+change the serial port passed to the init function while initializing serial interface.
 
-Enable Beaglebone Black UART1 in /boot/uEnv.txt. Make sure to use the correct line
-for your version of the Linux Kernel.
+If using Beaglebone Black, enable UART1 in /boot/uEnv.txt. Make sure to use 
+the correct line for your version of the Linux Kernel.
 

@@ -51,10 +51,6 @@ struct RxData {
     string faultCode;
 };
 
-// Function to initialize UART1 for communication with VESC
-// Call this once in main function before declaring any
-// motor objects. Only needs to be called once.
-
 // Rx values and position callback functions
 // BLDC interface will call these functions implicitly
 // whenever the appropriate packet is received
@@ -64,10 +60,10 @@ void bldc_pos_received(float pos); // should work after VESC firmware mod
 class BLDC {
 public:
     /* Static member functions */
-    // Function to initialize UART1 for communication with VESC
+    // Function to initialize serial port for communication with VESC
     // Call this once in main function before declaring any
     // motor objects. Only needs to be called once.
-    static void init(void);
+    static void init(char* serialPort);
     // Function to close fd for read/write at end of program
     static void close(void);
 

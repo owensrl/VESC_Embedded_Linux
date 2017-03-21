@@ -32,28 +32,10 @@
 const RxData zeroRx = {}; // rxData = 0
 
 // global variables
-static RxData rxUART1 = {}; // raw UART1 data
-static bool dataRdy = false; // true indicates that data has been received from UART 
+static RxData rxSerial = {}; // raw Serial data
+static bool dataRdy = false; // true indicates that data has been received from Serial 
                              // but not stored in rxData
 
-//********************************************************************************
-// Pre: Serial device is enabled
-// Post: File descriptor for read/write to serial device is opened. Rx data
-//       callback functions have been set.
-//********************************************************************************
-static void init_vesc_uart(void) {
-    comm_uart_init();
-	bldc_interface_set_rx_value_func(bldc_val_received);
-	// Won't work unless VESC firmware modified
-	bldc_interface_set_rx_rotor_pos_func(bldc_pos_received);
-}
-//********************************************************************************
-// Pre: Serial port file descriptor is open.
-// Post: File descriptor has been closed.
-//********************************************************************************
-static void close_vesc_uart(void) {
-	comm_uart_close();
-}
 //********************************************************************************
 // Pre: rx_rotor_pos_func callback has been set
 // Post: Rotor position in degrees is printed to console.
@@ -66,47 +48,47 @@ void bldc_pos_received(float pos) {
 }
 //********************************************************************************
 // Pre: rx_value_func callback has been set.
-// Post: Motor data is stored in global UART Rx buffer and
+// Post: Motor data is stored in global Serial Rx buffer and
 //       flag has been set indicating that data is available in buffer.
 //********************************************************************************
 void bldc_val_received(mc_values *val) {
-	// set raw UART rx struct
-	rxUART1.voltageIn = val->v_in;
-	rxUART1.tempPCB = val->temp_pcb;
-	rxUART1.tempMOS1 = val->temp_mos1;
-	rxUART1.tempMOS2 = val->temp_mos2;
-	rxUART1.tempMOS3 = val->temp_mos3;
-	rxUART1.tempMOS4 = val->temp_mos4;
-	rxUART1.tempMOS5 = val->temp_mos5;
-	rxUART1.tempMOS6 = val->temp_mos6;
-	rxUART1.currentMotor = val->current_motor;
-	rxUART1.currentIn = val->current_in;
-	rxUART1.rpm = val->rpm;
-	rxUART1.duty = val->duty_now;
-	rxUART1.ampHours = val->amp_hours;
-	rxUART1.ampHoursCharged = val->amp_hours_charged;
-	rxUART1.wattHours = val->watt_hours;
-	rxUART1.wattHoursCharged = val->watt_hours_charged;
-	rxUART1.tachometer = val->tachometer;
-	rxUART1.tachometerAbs = val->tachometer_abs;
-	rxUART1.faultCode = bldc_interface_fault_to_string(val->fault_code);
+	// set raw Serial rx struct
+	rxSerial.voltageIn = val->v_in;
+	rxSerial.tempPCB = val->temp_pcb;
+	rxSerial.tempMOS1 = val->temp_mos1;
+	rxSerial.tempMOS2 = val->temp_mos2;
+	rxSerial.tempMOS3 = val->temp_mos3;
+	rxSerial.tempMOS4 = val->temp_mos4;
+	rxSerial.tempMOS5 = val->temp_mos5;
+	rxSerial.tempMOS6 = val->temp_mos6;
+	rxSerial.currentMotor = val->current_motor;
+	rxSerial.currentIn = val->current_in;
+	rxSerial.rpm = val->rpm;
+	rxSerial.duty = val->duty_now;
+	rxSerial.ampHours = val->amp_hours;
+	rxSerial.ampHoursCharged = val->amp_hours_charged;
+	rxSerial.wattHours = val->watt_hours;
+	rxSerial.wattHoursCharged = val->watt_hours_charged;
+	rxSerial.tachometer = val->tachometer;
+	rxSerial.tachometerAbs = val->tachometer_abs;
+	rxSerial.faultCode = bldc_interface_fault_to_string(val->fault_code);
 	dataRdy = true;
 }
 //********************************************************************************
-// Pre: For UART: UART1 is enabled by uEnv.txt
-// Post: UART interface is initialized.
+// Pre: Serial port is enabled
+// Post: Serial interface is initialized.
 //********************************************************************************
-void BLDC::init(void) {
-	// Initialize UART1
-    comm_uart_init();
+void BLDC::init(char* serialPort) {
+	// Initialize Serial
+    comm_uart_init(serialPort);
 	// Set rx data callback functions
 	bldc_interface_set_rx_value_func(bldc_val_received);
 	// Won't work unless VESC firmware modified
 	bldc_interface_set_rx_rotor_pos_func(bldc_pos_received);
 }
 //********************************************************************************
-// Pre: UART fd is open.
-// Post: UART fd is closed for reading and writing.
+// Pre: Serial fd is open.
+// Post: Serial fd is closed for reading and writing.
 //********************************************************************************
 void BLDC::close() {
 	comm_uart_close();
@@ -242,12 +224,12 @@ void BLDC::set_Pos(float pos) {
 }
 //********************************************************************************
 // Pre: Rx callback functions have been set.
-// Post: Data has been read from UART and stored in rxData.
+// Post: Data has been read from Serial and stored in rxData.
 //********************************************************************************
 void BLDC::get_Values(void) {
 	bldc_interface_set_forward_can(id);
 	bldc_interface_get_values();
-	usleep(15000); // wait for data to become available on UART
+	usleep(15000); // wait for data to become available on Serial
 	read_Data();
 }
 //********************************************************************************
@@ -255,25 +237,25 @@ void BLDC::get_Values(void) {
 // Post: Rotor position callback function is invoked (pos printed to console).
 //********************************************************************************
 void BLDC::get_Pos(void) {
-	// Position read over UART requires non-standard firmware
+	// Position read over Serial requires non-standard firmware
 	bldc_interface_set_forward_can(id);
 	bldc_interface_get_rotor_pos();
 }
 //********************************************************************************
 // Pre: Rx callback functions have been set.
-// Post: UART Rx buffer has been read for available data. 
-//       If available, data has been read from UART and stored in raw UART struct.
+// Post: Serial Rx buffer has been read for available data. 
+//       If available, data has been read from Serial and stored in raw Serial struct.
 //********************************************************************************
 bool BLDC::read_Data(void) {
 	bool ret = false; // return true if read completes successfully
-	// read data from UART
+	// read data from Serial
 	receive_packet();
-	// if data from UART is available,
-	// store UART data in rxData
+	// if data from Serial is available,
+	// store Serial data in rxData
 	if (dataRdy) {
-		rxData = rxUART1;
-		dataRdy = false; // data has been read. UART1 rx no longer rdy for reading
-		rxUART1 = zeroRx; // zero out the raw UART rx data
+		rxData = rxSerial;
+		dataRdy = false; // data has been read. Serial rx no longer rdy for reading
+		rxSerial = zeroRx; // zero out the raw Serial rx data
 		ret = true;
 	}
 	// reset the packet handler in case data did not transfer correctly
