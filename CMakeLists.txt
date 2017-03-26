@@ -5,14 +5,14 @@ find_package(catkin REQUIRED COMPONENTS)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES vesc_bbb_uart
+  LIBRARIES ${PROJECT_NAME}
 )
 
 ###########
 ## Build ##
 ###########
 
-include_directories(include/vesc_bbb_uart)
+include_directories(include/${PROJECT_NAME})
 
 add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/bldc.cpp
