@@ -81,7 +81,7 @@ const Motor_Config CIM = {
 	1, // Min_Amps
 	0.95, // Max_Duty
 	0.05, // Min_Duty
-	3, // Brake_Current
+	5, // Brake_Current
 	1.0, // Scale_Max
 	-1.0 // Scale_Min
 };
