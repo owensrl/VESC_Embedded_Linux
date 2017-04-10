@@ -4,25 +4,42 @@
 #include "bldc.h"
 #include "motortypes.h"
 #include <unistd.h> // for usleep
+#include "timers.h" // for receiving data. must compile with -lrt flag.
+
+static enum {RequestMotor1, ReadMotor1, RequestMotor2, ReadMotor2} readMode = RequestMotor1;
 
 int main(void) {
-
+	// constants 
+	const int timerSP = 17; // timer set-point in milliseconds.
+	                        // adjust for frequency of read data.
+	                        // setting too low may cause packets to be dropped.
 	// variables
 	int command = 0;
 	int sleep = 3000;
 	bool decrement = false;
 	bool loop = true;
+	bool read = true;
 	
 	float val = 0;
 	float brake = 0;
 	float pos = 0;
 	
-	// For the UART interface
+	RxData testData = {};
+	
+	// Initialize the Serial interface
 	BLDC::init((char*)"/dev/ttyO1");
-	// Initialize motor object
+	
+	// Initialize motor objects
+	// Parameters are defined in motortypes.h
 	BLDC leftMotor(VESC1, motor1);
 	BLDC rightMotor(VESC2, motor2);
 	
+	// Create new timer for reading data
+	timer_t* timerid = new_timer();
+    if(timerid == NULL) {
+        fprintf(stderr, "Timer creation failed\n");
+        return 1;
+    }
 	// Main loop 
 	while(loop) {
 		printf("Choose a command\n");
@@ -87,14 +104,47 @@ int main(void) {
 						pos -= 1;
 					else
 						pos += 1;
-					usleep(3000);
+					usleep(sleep);
 				}
 				break;
 			case 7:
-				leftMotor.get_Values();
-				leftMotor.print_Data();
-				rightMotor.get_Values();
-				rightMotor.print_Data();
+				// Loop through state machine until all reads are finished.
+				// This loop can also be implemented as a thread to read continuously
+				while (read){
+				switch(readMode){
+					case RequestMotor1:
+						leftMotor.request_Values();
+						start_timer(timerid, timerSP);
+						readMode = ReadMotor1;
+						break;
+					case ReadMotor1:
+						if (check_timer(timerid)){
+							leftMotor.read_Data();
+							// Return values for use by application
+							//testData = leftMotor.get_Values();
+							leftMotor.print_Data();
+							readMode = RequestMotor2;
+						}
+						break;
+					case RequestMotor2:
+						rightMotor.request_Values();
+						start_timer(timerid, timerSP);
+						readMode = ReadMotor2;
+						break;
+					case ReadMotor2:
+						if (check_timer(timerid)){
+							rightMotor.read_Data();
+							// Return values for use by application
+							//testData = rightMotor.get_Values();
+							rightMotor.print_Data();
+							readMode = RequestMotor1; // make state-machine circular
+							read = false; // break read loop
+						}
+						break;
+					default:
+						break;
+				}
+				}
 				break;
 			case 8:
 				leftMotor.send_Alive();
@@ -108,8 +158,10 @@ int main(void) {
 		command = 0;
 		val = 0;
 		brake = 0;
+		read = 1;
 		}
 	leftMotor.apply_Brake(3);
 	rightMotor.apply_Brake(3);
+	delete_timer(timerid);
 	BLDC::close();
 }

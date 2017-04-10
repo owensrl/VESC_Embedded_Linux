@@ -90,12 +90,19 @@ public:
     void set_Current_Unscaled(float val); // torque control with unmapped ADC values
     void set_Duty_Unscaled(float val); // duty control with unmapped ADC values
     
+	// Request data from VESC
+	void request_Values(void); // rpm, current, voltage, etc.
+	void request_Pos(void); // Won't work without VESC firmware change.
+	
     // Getters
-    void get_Values(void); // rpm, current, voltage, etc.
-    void get_Pos(void); // Won't work without VESC firmware change.
+    RxData get_Values(void); // rpm, current, voltage, etc.
+    float get_Pos(void); // Won't work without VESC firmware change.
     // VESC can send position continuously to BLDC tool
     // but does not respond to request from serial packet.
     
+	// Function to read data from UART1
+    bool read_Data(void);
+	
     // Print Rx data to console (for debugging)
     void print_Data(void);
 
@@ -103,9 +110,6 @@ private:
     int id; // CAN Address
     RxData rxData; // realtime data received from VESC
     Motor_Config config; // Individual motor parameters
-    
-    // Function to read data from UART1
-    bool read_Data(void);
     
     // Scaling functions
     float scale_To_Float(float val, float min, float max);

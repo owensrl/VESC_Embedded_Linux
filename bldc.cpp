@@ -108,7 +108,7 @@ BLDC::~BLDC() {
 // Post: Speed of motor has been set in RPM.
 //********************************************************************************
 void BLDC::set_Speed(int rpm) {
-    // brake if joystick is within neutral range
+    // brake if value is within neutral range
     if (rpm > -1*config.Min_Erpm && rpm < config.Min_Erpm) {
 		// apply brake if braking enabled
 		if (config.enable_brake) {
@@ -119,12 +119,6 @@ void BLDC::set_Speed(int rpm) {
 		else
 			rpm = 0;
 	}
-	/*
-    // filter values between 0 and config.Min_Erpm
-    if (rpm < config.Min_Erpm && rpm > 0)
-        rpm = config.Min_Erpm;
-    else if (rpm > -1*config.Min_Erpm && rpm < 0)
-        rpm = -1*config.Min_Erpm;*/
     // set controller id and send the packet
     bldc_interface_set_forward_can(id);
     bldc_interface_set_rpm(rpm);
@@ -144,7 +138,7 @@ void BLDC::set_Speed_Unscaled(float val) {
 // Post: Current of motor has been set in Amps.
 //********************************************************************************
 void BLDC::set_Current(float amps) {
-    // brake if joystick is within neutral range
+    // brake if value is within neutral range
     if (amps > -1*config.Min_Amps && amps < config.Min_Amps) {
 		// apply brake if braking enabled
 		if (config.enable_brake) {
@@ -155,12 +149,6 @@ void BLDC::set_Current(float amps) {
 		else
 			amps = 0;
 	}
-	/*
-    // filter values between 0 and config.Min_Amps
-    if (amps < config.Min_Amps && amps > 0)
-        amps = config.Min_Amps;
-    else if (amps > -1*config.Min_Amps && amps < 0)
-        amps = -1*config.Min_Amps;*/
     // set controller id and send the packet
     bldc_interface_set_forward_can(id);
     bldc_interface_set_current(amps);
@@ -189,7 +177,7 @@ void BLDC::apply_Brake(float brake) {
 // Post: Duty cycle of motor has been set (percentage).
 //********************************************************************************
 void BLDC::set_Duty(float duty) {
-    // brake if joystick is within neutral range
+    // brake if value is within neutral range
     if (duty > -1*config.Min_Duty && duty < config.Min_Duty) {
 		// apply brake if braking enabled
 		if (config.enable_brake) {
@@ -226,17 +214,15 @@ void BLDC::set_Pos(float pos) {
 // Pre: Rx callback functions have been set.
 // Post: Data has been read from Serial and stored in rxData.
 //********************************************************************************
-void BLDC::get_Values(void) {
+void BLDC::request_Values(void) {
 	bldc_interface_set_forward_can(id);
 	bldc_interface_get_values();
-	usleep(15000); // wait for data to become available on Serial
-	read_Data();
 }
 //********************************************************************************
 // Pre: Rx callback functions have been set. Also change VESC firmware.
 // Post: Rotor position callback function is invoked (pos printed to console).
 //********************************************************************************
-void BLDC::get_Pos(void) {
+void BLDC::request_Pos(void) {
 	// Position read over Serial requires non-standard firmware
 	bldc_interface_set_forward_can(id);
 	bldc_interface_get_rotor_pos();
@@ -269,6 +255,20 @@ bool BLDC::read_Data(void) {
 void BLDC::send_Alive(void) {
 	bldc_interface_set_forward_can(id);
 	bldc_interface_send_alive();
+}
+//********************************************************************************
+// Pre: Motor object initialized.
+// Post: rxData returned as RxData struct.
+//********************************************************************************
+RxData BLDC::get_Values(void) {
+	return rxData;
+}
+//********************************************************************************
+// Pre: Motor object initialized.
+// Post: Rotor position returned as float.
+//********************************************************************************
+float BLDC::get_Pos(void) {
+	// TODO
 }
 //********************************************************************************
 // Pre: None.

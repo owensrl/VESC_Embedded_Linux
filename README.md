@@ -21,6 +21,11 @@ main.c demonstrates how to use the original
 APIs from vedderb to do control over serial. main.cpp demonstrates how to
 use the wrapper that I have implemented for serial control.
 
+main.cpp must be compiled with -lrt flag. Timers are used in main.cpp to implement
+a state-machine for receiving data. These timers require the -lrt compiler flag.
+Linker errors will occur without -lrt. The rx state-machine in main.cpp only runs when the user 
+requests data, but it could be implemented inside a thread to read continuously if desired.
+
 Serial APIs are implemented in C, but can be compiled with either C or C++ compilers. 
 The wrapper can only be compiled using C++. You can use the APIs in C
 without the wrapper.
