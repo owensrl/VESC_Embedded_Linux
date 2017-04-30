@@ -55,7 +55,7 @@ void start_timer(timer_t* timerid, int ms) {
     int sec = ms / 1000;
     int ns = (ms % 1000) * 1000 * 1000; // convert to nanoseconds
     struct itimerspec spec = {{0, 0}, {sec, ns}};
-    timer_settime(timerid, 0, &spec, NULL);
+    timer_settime(*timerid, 0, &spec, NULL);
 }
 
 // false: still running
@@ -64,7 +64,7 @@ void start_timer(timer_t* timerid, int ms) {
 // start_timer before using
 bool check_timer(timer_t* timerid) {
     struct itimerspec spec;
-    timer_gettime(timerid, &spec);
+    timer_gettime(*timerid, &spec);
     return spec.it_value.tv_sec == 0 && spec.it_value.tv_nsec == 0;
 }
 
