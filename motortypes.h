@@ -31,9 +31,8 @@
 
 // Define CAN ID map here.
 // ID = -1 for the VESC with UART connection
-enum VescID {VESC1 = -1, VESC2 = 1};
+enum VescID {LEFTDRIVE = -1, RIGHTDRIVE = 1, LIFT = 2, STORAGE = 3, BUCKET = 4};
 
-// Struct to store motor specific parameters
 struct Motor_Config {
 	bool enable_brake; // Enable/Disable braking
 	int Max_Erpm; // Maximum RPM of Motor
@@ -48,24 +47,22 @@ struct Motor_Config {
 	float Scale_Min; // Minimum input value
 };
 
-// Motor parameter definitions
-// Change and define new motors as needed
-const Motor_Config motor1 = {
+const Motor_Config Alien_4260 = {
 	true, // enable_brake;
-	30000, // Max_Erpm
+	29000, // Max_Erpm
 	900, // Min_Erpm
 	50, // Max_Amps
 	1, // Min_Amps
 	0.95, // Max_Duty
 	0.05, // Min_Duty
-	3, // Brake_Current
+	5, // Brake_Current
 	1.0, // Scale_Max
 	-1.0 // Scale_Min
 };
 
-const Motor_Config motor2 = {
+const Motor_Config Turnigy_SK3 = {
 	true, // enable_brake;
-	35000, // Max_Erpm
+	33000, // Max_Erpm
 	900, // Min_Erpm
 	50, // Max_Amps
 	1, // Min_Amps
@@ -75,4 +72,19 @@ const Motor_Config motor2 = {
 	1.0, // Scale_Max
 	-1.0 // Scale_Min
 };
+// CIM Cannot do speed control
+const Motor_Config CIM = {
+	true, // enable_brake;
+	20000, // Max_Erpm
+	0, // Min_Erpm
+	60, // Max_Amps
+	1, // Min_Amps
+	0.95, // Max_Duty
+	0.05, // Min_Duty
+	5, // Brake_Current
+	1.0, // Scale_Max
+	-1.0 // Scale_Min
+};
+
+
 #endif
